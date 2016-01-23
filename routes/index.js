@@ -70,4 +70,17 @@ router.get(
 	}
 );
 
+router.get(
+	'/clues/:id/compare/:answer',
+	function (req, res, next) {
+		global.database.compareAnswer(
+			req.params.id,
+			req.params.answer,
+			function (correct) {
+				res.json({ correct : correct });
+			}
+		);
+	}
+);
+
 module.exports = router;
