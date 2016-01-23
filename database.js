@@ -274,7 +274,7 @@ var Database = function () {
 					callback({});
 					return;
 				}
-				callback(compareAnswer(answer, row.answer));
+				callback(compareAnswer(decodeURIComponent(answer), row.answer));
 			}
 		);
 	}
