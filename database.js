@@ -166,7 +166,7 @@ var Database = function () {
 		db.get(
 			'SELECT ' +
 				'clues.value, ' +
-				'documents.clue, documents.answer ' +
+				'documents.clue, documents.answer, ' +
 				'categories.category ' +
 			'FROM ' +
 				'clues, documents, categories, classifications ' +
