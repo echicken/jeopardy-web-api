@@ -59,6 +59,17 @@ router.get(
 );
 
 router.get(
+	'/clues/random',
+	function (req, res, next) {
+		global.database.getClue(
+			function (clue) {
+				res.json(clue);
+			}
+		);
+	}
+);
+
+router.get(
 	'/clues/:id',
 	function (req, res, next) {
 		global.database.getClue(
