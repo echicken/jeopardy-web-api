@@ -162,14 +162,27 @@ var Database = function () {
 		);
 	}
 
+select clues.value, documents.clue, documents.answer, categories.category
+from clues, documents, categories, classifications
+where clues.id = documents.id
+and classifications.clue_id = clues.id
+and categories.id = classifications.category_id
+order by random() limit 1;
+
 	this.getRandomClue = function (callback) {
 		db.get(
 			'SELECT ' +
-				'clues.value, documents.clue, documents.answer ' +
+				'clues.value, ' +
+				'documents.clue, documents.answer ' +
+				'categories.category '
 			'FROM ' +
-				'clues, documents ' +
+				'clues, documents, categories, classifications ' +
 			'WHERE ' +
 				'clues.id = documents.id ' +
+				'AND ' +
+				'classifications.clue_id = clues.id ' +
+				'AND ' +
+				'categories.id = classifications.category_id ' +
 			'ORDER BY RANDOM() LIMIT 1',
 			function (err, row) {
 				if (err !== null) {
