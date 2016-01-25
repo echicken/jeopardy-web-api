@@ -164,8 +164,13 @@ var Database = function () {
 
 	this.getRandomClue = function (callback) {
 		db.get(
-			'SELECT id FROM clues ' +
-			'WHERE rowid = (abs(random()) % (select max(rowid)+1 from clues)) ',
+			'SELECT ' +
+				'clues.value, documents.clue, documents.answer ' +
+			'FROM ' +
+				'clues, documents ' +
+			'WHERE ' +
+				'clues.id = documents.id ' +
+			'ORDER BY RANDOM() LIMIT 1',
 			function (err, row) {
 				if (err !== null) {
 					console.log(err);
