@@ -167,7 +167,7 @@ var Database = function () {
 			'SELECT ' +
 				'clues.value, ' +
 				'documents.clue, documents.answer ' +
-				'categories.category '
+				'categories.category ' +
 			'FROM ' +
 				'clues, documents, categories, classifications ' +
 			'WHERE ' +
