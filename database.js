@@ -162,6 +162,25 @@ var Database = function () {
 		);
 	}
 
+	this.getRandomClue = function (callback) {
+		db.get(
+			'SELECT ' +
+				'clues.id, clues.value, documents.clue, documents.answer ' +
+			'FROM ' +
+				'clues, documents ' +
+			'WHERE ' +
+				'rowid = (abs(random()) % (select max(rowid)+1 from clues))',
+			function (err, row) {
+				if (err !== null) {
+					console.log(err);
+					callback({});
+					return;
+				}
+				callback(typeof row === 'undefined' ? {} : row);
+			}
+		);
+	}
+
 	function compareAnswer(answer1, answer2) {
 
 		function normalize(str) {
