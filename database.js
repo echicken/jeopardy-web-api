@@ -165,7 +165,7 @@ var Database = function () {
 	this.getRandomClue = function (callback) {
 		db.get(
 			'SELECT ' +
-				'clues.value, ' +
+				'clues.id, clues.value, ' +
 				'documents.clue, documents.answer, ' +
 				'categories.category ' +
 			'FROM ' +
