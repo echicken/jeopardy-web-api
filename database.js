@@ -162,13 +162,6 @@ var Database = function () {
 		);
 	}
 
-select clues.value, documents.clue, documents.answer, categories.category
-from clues, documents, categories, classifications
-where clues.id = documents.id
-and classifications.clue_id = clues.id
-and categories.id = classifications.category_id
-order by random() limit 1;
-
 	this.getRandomClue = function (callback) {
 		db.get(
 			'SELECT ' +
