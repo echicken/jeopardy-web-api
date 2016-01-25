@@ -169,7 +169,10 @@ var Database = function () {
 			'FROM ' +
 				'clues, documents ' +
 			'WHERE ' +
-				'clues.rowid = (abs(random()) % (select max(clues.rowid)+1 from clues))',
+				'clues.rowid = ' +
+					'(abs(random()) % (select max(clues.rowid)+1 from clues)) ' +
+				'AND ' +
+					'documents.id = clues.id',
 			function (err, row) {
 				if (err !== null) {
 					console.log(err);
