@@ -226,9 +226,7 @@ var Database = function () {
 			);
 
 			str = str.replace(/\sAND\s/g, '\s'); // & / AND
-			str = str.replace(/[^\w|\s]/g, '');
-
-			str = str.replace(/^\s+|\s+$/g, ''); // Trim
+			str = str.replace(/[^\w]/g, '');
 
 			return str;
 
