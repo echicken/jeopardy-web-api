@@ -1,7 +1,9 @@
 var	fs = require('fs'),
 	util = require('util'),
 	events = require('events'),
-	sqlite3 = require('sqlite3');
+	sqlite3 = require('sqlite3'),
+	Iconv = require('iconv').Iconv,
+	clj_fuzzy = require('clj-fuzzy');
 
 var Database = function () {
 
@@ -192,96 +194,61 @@ var Database = function () {
 
 		function normalize(str) {
 
-			str = str.toUpperCase();
+			var iconv = new Iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE');
 
-			str = str.replace(/\s\s+/g, ' ');
+			str = iconv.convert(str).toString().toUpperCase();
 
-			/*	You needn't phrase your response in the form of a question, but
-				some players might think it's necessary. Let's help them out. */
-			str = str.replace(/^(WHO\s)(IS|WAS|ARE|WERE)\s/,	'');
-			str = str.replace(/^(WHAT\s)(IS|WAS|ARE|WERE)\s/, '');
-			str = str.replace(/^(WHERE\s)(IS|WAS|ARE|WERE)\s/, '');
-			str = str.replace(/^(WHEN\s)(IS|WAS|ARE|WERE)\s/, '');
-			str = str.replace(/^(WHY\s)(IS|WAS|ARE|WERE)\s/, '');
-			str = str.replace(/^(HOW\s)(IS|WAS|ARE|WERE)\s/, '');
-
-			/*	What did you eat? "pie".  Incorrect; the answer is "A pie".
-				Where are you? "at work".  Incorrect; the answer is "Work".
-				And so forth. */
-			str = str.replace(/^A\s/, '');
-			str = str.replace(/^AT\s/, '');
-			str = str.replace(/^THE\s/, '');
-			str = str.replace(/^IN\s/, '');
-
-			/*	These could lead to some falsely right answers, but whatever. We
-				won't cover every possible honorific, but there are some common
-				ones that I don't think people should be penalized for omitting.
-				Which English king liked to cut off his wives' heads?  "Henry
-				VIII" Incorrect; the answer is "King Henry VIII"; yet "King" was
-				in the question. etc. */
-			str = str.replace(/(MR|MS|MRS|DR|CPT|CAPT)\.*\s/g, '');
+			// No need to phrase as a question
 			str = str.replace(
-				/(MISTER|MISS|MISSUS|DOCTOR|KING|QUEEN|PRINCE|PRINCESS|CAPTAIN)\s/g,
+				/^(WH(O|AT|EN|ERE|Y)|HOW)\s(IS|WAS|ARE|WERE)\s/,
 				''
 			);
 
-			str = str.replace(/\sAND\s/g, '\s'); // & / AND
-			str = str.replace(/[^\w]/g, '');
+			// Strip out unnecessary leading words
+			str = str.replace(/^(A|AN|AT|IN|THE)\s/, '');
+
+			// Honorifics
+			str = str.replace(/(MR|MS|MRS|DR|CPT|CAPT)\.*\s/g, ' ');
+			str = str.replace(
+				/(MIS(TER|S|SUS)|DOCTOR|KING|QUEEN|PRINC(E|ESS)|CAPTAIN)\s/g,
+				''
+			);
+
+			str = str.replace(/&/g, 'AND');
+			str = str.replace(/[^\w]/g, ' ');
+			str = str.replace(/\s\s+/g, ' ');
 
 			return str;
 
 		}
 
-		var ret = false;
-
-		/*	Some answers look like: (David) Bowie, to indicate an optional
-			component. */
-		var re = /\(.*\)/;
-		var match = re.exec(answer2);
+		var match = /\(.*\)/.exec(answer2);
 		if (match !== null) {
-			/*	If the real answer has a bracketed component, we'll extract both
-				words and see if either one matches. */
 			var answer2a = answer2.replace(match[0], '');
-			var answer2b = match[0].replace(/\(|\)/g, '');
-			ret = (
-				normalize(answer1) === normalize(answer2a) ||
-				normalize(answer1) === normalize(answer2b)
-			);
-			/*	If neither word matched, we'll see if both strings match once
-				you	strip away the brackets and normalize. */
-			if (!ret) {
-				var a1 = answer1.replace(/\(|\)/g, '');
-				var a2 = answer2.replace(/\(|\)/g, '');
-				ret = (normalize(a1) === normalize(a2));
-			}
+			if (normalize(answer1) === normalize(answer2a)) return true;
 		}
 
-		if (!ret) {
-			var a1 = normalize(answer1);
-			var a2 = normalize(answer2);
-			ret = (a1 === a2);
-			/*	However, if it's just a two word answer after normalization, and the
-				second word of each answer matches, we'll give it to them.  This is
-				another case where we may falsely identify a wrong answer as correct,
-				but it will also catch a lot of cases where someone gave a correct
-				surname but not a first name, and similar situations.  This is still
-				questionable and I may remove it. */
-			a1 = a1.split(' ');
-			a2 = a2.split(' ');
-			if (!ret) ret = (a1.length == 2 && a2.length === 2 && a1[1] === a2[1]);
-			/*	If the player's answer has all of the same words as the real answer,
-				but in a different order, just give it to them. */
-			if (!ret && a1.length === a2.length) {
-				ret = (
-					a1.some(function (e) { return (a2.indexOf(e) < 0); })
-					? false
-					: true
-				);
-			}
+		var a1 = normalize(answer1);
+		var a2 = normalize(answer2);
 
+		if (a1 === a2) return true;
+
+		// THIS & THAT matches THIS & THAT or THAT & THIS
+		var a1a = a1.split(/\sAND\s/).map(function (e) { return normalize(e); });
+		var a2a = a2.split(/\sAND\s/).map(function (e) { return normalize(e); });
+		if (a1a.length === 2 && a2a.length === 2 &&
+			(a1a[0] === a2a[0] || a1a[0] === a2a[1]) &&
+			(a1a[1] === a2a[1] || a1a[1] === a2a[0])
+		) {
+				return true;
+		} else if (a1a.length === 1 && a1a[0] === a2a.join(' ')) {
+			return true;
 		}
 
-		return ret;
+		if (clj_fuzzy.metrics.dice(a1, a2) >= .8) return true;
+
+		return false;
+
 	}
 
 	this.compareAnswer = function (id, answer, callback) {
