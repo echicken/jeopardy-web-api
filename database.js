@@ -164,7 +164,6 @@ var Database = function () {
 		);
 	}
 
-	// This is really fucking slow.  I need a better query.
 	this.getRandomClue = function (callback) {
 		db.get(
 			'SELECT ' +
@@ -174,12 +173,13 @@ var Database = function () {
 			'FROM ' +
 				'clues, documents, categories, classifications ' +
 			'WHERE ' +
+				'clues.id = (SELECT id FROM clues ORDER BY RANDOM() LIMIT 1) ' +
+				'AND ' + 
 				'clues.id = documents.id ' +
 				'AND ' +
 				'classifications.clue_id = clues.id ' +
 				'AND ' +
-				'categories.id = classifications.category_id ' +
-			'ORDER BY RANDOM() LIMIT 1',
+				'categories.id = classifications.category_id',
 			function (err, row) {
 				if (err !== null) {
 					console.log(err);
