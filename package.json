@@ -1,5 +1,5 @@
 {
-  "name": "qotd",
+  "name": "jeopardy-web-api",
   "version": "0.0.0",
   "private": true,
   "dependencies": {
@@ -10,6 +10,8 @@
     "express": "~4.13.1",
     "morgan": "~1.6.1",
     "serve-favicon": "~2.3.0",
-    "sqlite3": "~3.1.0"
+    "sqlite3": "~3.1.0",
+    "iconv":"*",
+    "clj-fuzzy":"0.1.8"
   }
 }
