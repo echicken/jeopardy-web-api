@@ -164,6 +164,7 @@ var Database = function () {
 		);
 	}
 
+	// This is really fucking slow.  I need a better query.
 	this.getRandomClue = function (callback) {
 		db.get(
 			'SELECT ' +
