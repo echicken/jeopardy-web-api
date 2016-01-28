@@ -218,6 +218,7 @@ var Database = function () {
 			str = str.replace(/&/g, 'AND');
 			str = str.replace(/[^\w]/g, ' ');
 			str = str.replace(/\s\s+/g, ' ');
+			str = str.trim();
 
 			return str;
 
