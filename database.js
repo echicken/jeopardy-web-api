@@ -175,14 +175,13 @@ var Database = function () {
 				'clues, documents, categories, classifications, airdates ' +
 			'WHERE ' +
 				'clues.id = (SELECT id FROM clues ORDER BY RANDOM() LIMIT 1) ' +
-				'AND ' +
-				'clues.id = documents.id ' +
-				'AND ' +
-				'classifications.clue_id = clues.id ' +
-				'AND ' +
-				'categories.id = classifications.category_id ' +
-				'AND ' +
-				'clues.game = airdates.game',
+				'AND clues.id = documents.id ' +
+				'AND classifications.clue_id = clues.id ' +
+				'AND categories.id = classifications.category_id ' +
+				'AND clues.game = airdates.game ' +
+				'AND documents.clue NOT LIKE "%seen here%" ' +
+				'AND documents.clue NOT LIKE "%shown here%" ' +
+				'AND documents.clue NOT LIKE "%heard here%"',
 			function (err, row) {
 				if (err !== null) {
 					console.log(err);
