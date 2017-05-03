@@ -170,16 +170,19 @@ var Database = function () {
 				'clues.id, clues.value, ' +
 				'documents.clue, documents.answer, ' +
 				'categories.category ' +
+				'airdates.airdate ' +
 			'FROM ' +
-				'clues, documents, categories, classifications ' +
+				'clues, documents, categories, classifications, airdates ' +
 			'WHERE ' +
 				'clues.id = (SELECT id FROM clues ORDER BY RANDOM() LIMIT 1) ' +
-				'AND ' + 
+				'AND ' +
 				'clues.id = documents.id ' +
 				'AND ' +
 				'classifications.clue_id = clues.id ' +
 				'AND ' +
-				'categories.id = classifications.category_id',
+				'categories.id = classifications.category_id ' +
+				'AND ' +
+				'clues.game = airdates.game',
 			function (err, row) {
 				if (err !== null) {
 					console.log(err);
