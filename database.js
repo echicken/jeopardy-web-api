@@ -169,7 +169,7 @@ var Database = function () {
 			'SELECT ' +
 				'clues.id, clues.value, ' +
 				'documents.clue, documents.answer, ' +
-				'categories.category ' +
+				'categories.category, ' +
 				'airdates.airdate ' +
 			'FROM ' +
 				'clues, documents, categories, classifications, airdates ' +
